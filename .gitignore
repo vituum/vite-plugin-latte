@@ -4,3 +4,4 @@ node_modules
 vendor
 temp
 index.html
+package-lock.json
