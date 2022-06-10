@@ -1,0 +1,10 @@
+{
+  "name": "@newlogic-digital/vite-latte",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "index.js",
+  "devDependencies": {
+    "eslint": "^8.17.0",
+    "eslint-config-standard": "17.0.0"
+  }
+}
