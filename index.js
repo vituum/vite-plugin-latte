@@ -1,5 +1,6 @@
-import { extname } from 'path'
+import { extname, resolve } from 'path'
 import * as childProcess from 'child_process'
+import FastGlob from 'fast-glob'
 
 const execSync = (cmd) => {
     try {
@@ -15,16 +16,23 @@ const execSync = (cmd) => {
 }
 
 const renderTemplate = (path, config) => {
-    return execSync(`php index.php ${path} ${JSON.stringify(config)}`)
+    if (config.data) {
+        config.data = FastGlob.sync(config.data).map(entry => resolve(process.cwd(), entry))
+    }
+
+    return execSync(`${config.php} index.php ${path} ${JSON.stringify(JSON.stringify(config))}`)
 }
 
 const latte = (config) => {
     return {
         name: 'vite-plugin-latte',
+        config: ({ root }) => {
+            config.root = root
+        },
         transformIndexHtml: {
             enforce: 'pre',
             async transform(content, { path, server }) {
-                const renderLatte = renderTemplate(path, JSON.stringify(config))
+                const renderLatte = renderTemplate(path, config)
 
                 if (renderLatte.error) {
                     server.ws.send({

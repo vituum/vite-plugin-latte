@@ -6,6 +6,9 @@
   "scripts": {
     "postinstall": "composer install"
   },
+  "dependencies": {
+    "fast-glob": "^3.2.11"
+  },
   "devDependencies": {
     "vite": "^2.9.12",
     "eslint": "^8.17.0",
