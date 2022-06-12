@@ -8,6 +8,16 @@ ini_set('display_errors', "1");
 require __DIR__ . '/vendor/autoload.php';
 
 $latte = new Latte\Engine;
+$file = $argv[1] ?? null;
+$config = $argv[2] ?? null;
+
+if ($config) {
+    try {
+        $config = json_decode($config, false, 512, JSON_THROW_ON_ERROR);
+    } catch (JsonException $e) {
+        throw new Error($e->getMessage());
+    }
+}
 
 if (!file_exists(__DIR__ . '/temp') && !mkdir($concurrentDirectory = __DIR__ . '/temp') && !is_dir($concurrentDirectory)) {
     throw new Error(sprintf('Directory "%s" was not created', $concurrentDirectory));

@@ -23,9 +23,7 @@ export default {
 <script type="application/json">
   {
     "template": "path/to/template.latte",
-    "data": {
-      "title": "Hello world"
-    }
+    "title": "Hello world"
   }
 </script>
 ```

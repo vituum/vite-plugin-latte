@@ -7,18 +7,11 @@
   "assets": {
     "css": {
       "all": [
-        "/src/styles/main.css",
-        "/src/styles/font.galano.css"
-      ],
-      "tailwind": "/temp/core/tailwind.css",
-      "tailwind.src": "/src/styles/tailwind.css",
-      "ratio": "/temp/core/ratio.css"
+        "/src/styles/main.css"
+      ]
     },
     "js": {
-      "importmap": "/public/importmap.json",
-      "main": "/src/scripts/main.js",
-      "es-module-shims": "https://cdn.jsdelivr.net/npm/es-module-shims@0.10.4/dist/es-module-shims.js",
-      "lazysizes": "https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"
+      "main": "/src/scripts/main.js"
     }
   },
   "layout": {

@@ -1,6 +1,5 @@
+import { extname } from 'path'
 import * as childProcess from 'child_process'
-import * as fs from 'fs'
-const start = new Date()
 
 const execSync = (cmd) => {
     try {
@@ -15,13 +14,39 @@ const execSync = (cmd) => {
     }
 }
 
-const latte = execSync('php index.php')
-
-if (latte.error) {
-    console.error(latte.output)
-    process.exit(1)
+const renderTemplate = (path, config) => {
+    return execSync(`php index.php ${path} ${JSON.stringify(config)}`)
 }
 
-fs.writeFileSync('index.html', latte.output)
+const latte = (config) => {
+    return {
+        name: 'vite-plugin-latte',
+        transformIndexHtml: {
+            enforce: 'pre',
+            async transform(content, { path, server }) {
+                const renderLatte = renderTemplate(path, JSON.stringify(config))
 
-console.info('\x1b[34m', 'index.html', '\x1b[33m', `${new Date() - start}ms`, '\x1b[0m')
+                if (renderLatte.error) {
+                    server.ws.send({
+                        type: 'error',
+                        err: {
+                            message: renderLatte.output,
+                            plugin: 'vite-plugin-latte'
+                        }
+                    })
+
+                    return
+                }
+
+                return renderLatte.output
+            }
+        },
+        handleHotUpdate({ file, server }) {
+            if (extname(file) === '.latte') {
+                server.ws.send({ type: 'full-reload' })
+            }
+        }
+    }
+}
+
+export default latte
