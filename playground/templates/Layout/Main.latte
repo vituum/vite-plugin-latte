@@ -18,7 +18,7 @@
         {/foreach}
 
         {foreach $assets->css->all as $url}
-            <link rel="stylesheet" href="{$url}">
+            <link rel="stylesheet" href="{$url|asset}">
         {/foreach}
 
         <script n:syntax="off">
@@ -26,7 +26,7 @@
           document.documentElement.className = document.documentElement.className.replace('no-js', 'js'); matchMedia('(hover: hover) and (pointer: fine)').matches && document.documentElement.classList.add('no-touch'); /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && document.documentElement.classList.add('mobile'); document.documentElement.classList.add(navigator.platform.toLowerCase().replace(/ .*/, '')); !function(e) { let t; (t = e.match(/(chrome|safari|firefox)/i)) && document.documentElement.classList.add(t[0]) } (navigator.userAgent.toLowerCase());
         </script>
 
-        <script src="{$assets->js->main}" type="module"></script>
+        <script src="{$assets->js->main|asset}" type="module"></script>
 
         <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=YAX2K07XnE">
         <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=YAX2K07XnE">
@@ -50,7 +50,7 @@
                 {import '../Ui/Btn.latte'}
 
                 {embed UiBtnPrimary, $type = 'outline'}
-                    <span n:block="title">Hello World</span>
+                    <span n:block="title">{$title}</span>
                 {/embed}
             </main>
             {include 'Footer.latte'}

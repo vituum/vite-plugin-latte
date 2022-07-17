@@ -1,4 +1,5 @@
 import { extname, resolve } from 'path'
+import process from 'node:process'
 import * as childProcess from 'child_process'
 import FastGlob from 'fast-glob'
 
@@ -15,24 +16,43 @@ const execSync = (cmd) => {
     }
 }
 
-const renderTemplate = (path, config) => {
-    if (config.data) {
-        config.data = FastGlob.sync(config.data).map(entry => resolve(process.cwd(), entry))
+const renderTemplate = (path, params) => {
+    if (params.data) {
+        params.data = FastGlob.sync(params.data).map(entry => resolve(process.cwd(), entry))
     }
 
-    return execSync(`${config.php} index.php ${path} ${JSON.stringify(JSON.stringify(config))}`)
+    Object.keys(params.filters).forEach(key => {
+        if (typeof params.filters[key] === 'function') {
+            params.filters[key] = params.filters[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
+        }
+    })
+
+    Object.keys(params.functions).forEach(key => {
+        if (typeof params.functions[key] === 'function') {
+            params.functions[key] = params.functions[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
+        }
+    })
+
+    return execSync(`${params.php} index.php ${params.root + path} ${JSON.stringify(JSON.stringify(params))}`)
 }
 
-const latte = (config) => {
+const latte = (params) => {
+    params.cwd = process.cwd()
+
+    if (params.php === 'docker') {
+        params.php = `docker run --rm --name index -v "${process.cwd()}":/usr/src/app -w /usr/src/app php:8-cli php`
+    }
+
     return {
+        _params: params,
         name: 'vite-plugin-latte',
         config: ({ root }) => {
-            config.root = root
+            params.root = root
         },
         transformIndexHtml: {
             enforce: 'pre',
             async transform(content, { path, server }) {
-                const renderLatte = renderTemplate(path, config)
+                const renderLatte = renderTemplate(path, params)
 
                 if (renderLatte.error) {
                     server.ws.send({
@@ -50,7 +70,7 @@ const latte = (config) => {
             }
         },
         handleHotUpdate({ file, server }) {
-            if (extname(file) === '.latte') {
+            if (extname(file) === '.latte' || extname(file) === '.html') {
                 server.ws.send({ type: 'full-reload' })
             }
         }

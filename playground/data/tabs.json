@@ -1,1 +1,10 @@
-{}
+{
+  "assets": {
+    "css": {
+      "mehehe": "asda"
+    }
+  },
+  "tabs": [{
+    "title": "title"
+  }]
+}

@@ -33,15 +33,18 @@ export default {
         latte({
             php: 'php',
             filters: {
-                icon: 'latte/IconFilter.php'
+                icon: 'latte/IconFilter.php',
+                asd: (hello, there) => {
+                    console.log('Hello world')
+                }
             },
             functions: {},
             tags: {},
             globals: {
+                template: resolve(process.cwd(), 'playground/templates/Layout/Main.latte'),
                 srcPath: resolve(process.cwd(), 'playground')
             },
-            data: './playground/data/**/*.json',
-            template: 'templates/Layout/Main.latte'
+            data: './playground/data/**/*.json'
         })
     ],
     resolve: {

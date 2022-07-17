@@ -4,15 +4,16 @@
 export default {
   plugins: [
     latte({
-      php: 'php',
+      php: 'php', // php or docker
       filters: {
         icon: 'latte/IconFilter.php',
         nbsp: () => {}
       },
       functions: {},
       tags: {},
-      globals: {},
-      template: 'playground/templates/Layout/Main.latte'
+      globals: {
+          template: 'playground/templates/Layout/Main.latte'
+      }
     })
   ]
 }
