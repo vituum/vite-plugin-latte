@@ -20,7 +20,7 @@ if ($config) {
     }
 }
 
-$isDocker = str_starts_with($config->php, 'docker');
+$isDocker = str_starts_with($config->bin, 'docker');
 
 if ($isDocker) {
     define("ROOT_DIR", '/usr/src/app/');

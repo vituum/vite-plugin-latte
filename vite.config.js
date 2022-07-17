@@ -31,7 +31,7 @@ export default {
     plugins: [
         middleware,
         latte({
-            php: 'php',
+            bin: 'php',
             filters: {
                 icon: 'latte/IconFilter.php',
                 asd: (hello, there) => {

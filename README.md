@@ -4,7 +4,7 @@
 export default {
   plugins: [
     latte({
-      php: 'php', // php or docker
+      bin: 'php', // php or docker
       filters: {
         icon: 'latte/IconFilter.php',
         nbsp: () => {}
