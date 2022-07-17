@@ -1,6 +1,6 @@
 {
   "name": "@newlogic-digital/vite-plugin-latte",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -10,8 +10,8 @@
     "fast-glob": "^3.2.11"
   },
   "devDependencies": {
-    "vite": "^2.9.12",
-    "eslint": "^8.17.0",
-    "eslint-config-standard": "17.0.0"
+    "vite": "^3.0.0",
+    "eslint": "^8.20.0",
+    "eslint-config-standard": "^17.0.0"
   }
 }
