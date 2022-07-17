@@ -34,8 +34,8 @@ export default {
             bin: 'php',
             filters: {
                 icon: 'latte/IconFilter.php',
-                asd: (hello, there) => {
-                    console.log('Hello world')
+                hello: (value, there) => {
+                    console.log('Hello ' + there + ' ' + value)
                 }
             },
             functions: {},

@@ -1,5 +1,5 @@
-import test from './vite.config.js'
+import vite from './vite.config.js'
 
-const name = 'asd'
+const params = JSON.parse(process.argv[2])
 
-console.log(test.plugins.filter(({ name }) => name === 'vite-plugin-latte')[0]._params.filters[name].toString())
+vite.plugins.filter(({ name }) => name === 'vite-plugin-latte')[0]._params.filters[params.name](params.value, params.p1, params.p2, params.p3, params.p4)
