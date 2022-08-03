@@ -75,19 +75,12 @@ try {
 /**
  * @throws JsonException
  */
-function NodeHandler($name, $value, $p1, $p2, $p3, $p4): string {
-    $params = [
-        'name' => $name,
-        'value' => $value,
-        'p1' => $p1,
-        'p2' => $p2,
-        'p3' => $p3,
-        'p4' => $p4
-    ];
+function NodeHandler($name, ...$params): string {
+    array_unshift($params, $name);
 
     exec('node handler.js ' . json_encode(json_encode($params, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR), $output);
 
-    return $output[0] ?? $value;
+    return $output[0] ?? $params[1];
 }
 
 foreach (['tel', 'asset'] as $filter) {
@@ -105,8 +98,8 @@ foreach ($config->filters  as $filter => $path) {
         require ROOT_DIR . $path;
         $latte->addFilter($filter, 'App\Latte\\' . ucfirst($filter) . 'Filter::execute');
     } elseif (!$isDocker) {
-        $latte->addFilter($filter, function ($value, $p1 = '', $p2 = '', $p3 = '', $p4 = '') use ($filter) : string {
-            return NodeHandler($filter, $value, $p1, $p2, $p3, $p4);
+        $latte->addFilter($filter, function (...$params) use ($filter) : string {
+            return NodeHandler($filter, ...$params);
         });
     }
 }
@@ -116,8 +109,8 @@ foreach ($config->functions  as $function => $path) {
         require ROOT_DIR . $path;
         $latte->addFunction($function, 'App\Latte\\' . ucfirst($function) . 'Function::execute');
     }  elseif (!$isDocker) {
-        $latte->addFunction($function, function ($value, $p1 = '', $p2 = '', $p3 = '', $p4 = '') use ($function) : string {
-            return NodeHandler($function, $value, $p1, $p2, $p3, $p4);
+        $latte->addFunction($function, function (...$params) use ($function) : string {
+            return NodeHandler($function, ...$params);
         });
     }
 }

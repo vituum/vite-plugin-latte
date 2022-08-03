@@ -31,15 +31,12 @@ export default {
     plugins: [
         middleware,
         latte({
-            bin: 'php',
             filters: {
                 icon: 'latte/IconFilter.php',
                 hello: (value, there) => {
                     console.log('Hello ' + there + ' ' + value)
                 }
             },
-            functions: {},
-            tags: {},
             globals: {
                 template: resolve(process.cwd(), 'playground/templates/Layout/Main.latte'),
                 srcPath: resolve(process.cwd(), 'playground')

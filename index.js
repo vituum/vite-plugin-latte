@@ -2,6 +2,16 @@ import { extname, resolve } from 'path'
 import process from 'node:process'
 import * as childProcess from 'child_process'
 import FastGlob from 'fast-glob'
+import lodash from 'lodash'
+
+const defaultParams = {
+    bin: 'php',
+    filters: {},
+    functions: {},
+    tags: {},
+    globals: {},
+    data: ''
+}
 
 const execSync = (cmd) => {
     try {
@@ -38,6 +48,8 @@ const renderTemplate = (path, params) => {
 
 const latte = (params) => {
     params.cwd = process.cwd()
+
+    params = lodash.merge(defaultParams, params)
 
     if (params.bin === 'docker') {
         params.bin = `docker run --rm --name index -v "${process.cwd()}":/usr/src/app -w /usr/src/app php:8-cli php`
