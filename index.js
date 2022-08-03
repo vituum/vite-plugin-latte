@@ -10,7 +10,8 @@ const defaultParams = {
     functions: {},
     tags: {},
     globals: {},
-    data: ''
+    data: '',
+    packageRoot: 'node_modules/vite-plugin-latte'
 }
 
 const execSync = (cmd) => {
@@ -43,13 +44,15 @@ const renderTemplate = (path, params) => {
         }
     })
 
-    return execSync(`${params.bin} index.php ${params.root + path} ${JSON.stringify(JSON.stringify(params))}`)
+    return execSync(`${params.bin} ${params.packageRoot}/index.php ${params.root + path} ${JSON.stringify(JSON.stringify(params))}`)
 }
 
 const latte = (params) => {
     params.cwd = process.cwd()
 
     params = lodash.merge(defaultParams, params)
+
+    params.packageRoot = resolve(process.cwd(), params.packageRoot)
 
     if (params.bin === 'docker') {
         params.bin = `docker run --rm --name index -v "${process.cwd()}":/usr/src/app -w /usr/src/app php:8-cli php`

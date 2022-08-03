@@ -1,10 +1,9 @@
 {
-  "name": "@newlogic-digital/vite-plugin-latte",
-  "version": "0.0.2",
+  "name": "vite-plugin-latte",
+  "version": "0.1.1",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "postinstall": "composer install",
     "dev": "vite dev",
     "build": "vite build && mv public/views/* public && rm -rf public/views",
     "preview": "vite preview"
@@ -17,5 +16,20 @@
     "vite": "^3.0.4",
     "eslint": "^8.21.0",
     "eslint-config-standard": "^17.0.0"
+  },
+  "files": [
+    "index.js",
+    "handler.js",
+    "index.php",
+    "latte",
+    "vendor"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lubomirblazekcz/vite-plugin-latte.git"
   }
 }

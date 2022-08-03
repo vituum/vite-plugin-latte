@@ -27,6 +27,8 @@ if ($isDocker) {
     define("ROOT_DIR", $config->cwd . '/');
 }
 
+define("PACKAGE_DIR", str_replace($config->cwd, ROOT_DIR, $config->packageRoot));
+
 if (!file_exists(__DIR__ . '/temp') && !mkdir($concurrentDirectory = __DIR__ . '/temp') && !is_dir($concurrentDirectory)) {
     throw new Error(sprintf('Directory "%s" was not created', $concurrentDirectory));
 }
@@ -75,21 +77,21 @@ try {
 /**
  * @throws JsonException
  */
-function NodeHandler($name, ...$params): string {
+function NodeHandler($name, ...$params) : string {
     array_unshift($params, $name);
 
-    exec('node handler.js ' . json_encode(json_encode($params, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR), $output);
+    exec('node '. PACKAGE_DIR .'/handler.js ' . json_encode(json_encode($params, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR), $output);
 
     return $output[0] ?? $params[1];
 }
 
 foreach (['tel', 'asset'] as $filter) {
-    require ROOT_DIR . '/latte/' . ucfirst($filter) . 'Filter.php';
+    require PACKAGE_DIR . '/latte/' . ucfirst($filter) . 'Filter.php';
     $latte->addFilter($filter, 'App\Latte\\' . ucfirst($filter) . 'Filter::execute');
 }
 
 foreach (['fetch', 'placeholder', 'randomColor'] as $function) {
-    require ROOT_DIR . '/latte/' . ucfirst($function) . 'Function.php';
+    require PACKAGE_DIR . '/latte/' . ucfirst($function) . 'Function.php';
     $latte->addFunction($function, 'App\Latte\\' . ucfirst($function) . 'Function::execute');
 }
 
@@ -116,7 +118,7 @@ foreach ($config->functions  as $function => $path) {
 }
 
 $tag = 'json';
-require ROOT_DIR . '/latte/' . ucfirst($tag) . 'Tag.php';
+require PACKAGE_DIR . '/latte/' . ucfirst($tag) . 'Tag.php';
 eval('$latte->addExtension(new App\Latte\\' . ucfirst($tag) . 'Extension);');
 
 foreach ($config->tags  as $tag => $path) {
