@@ -1,4 +1,5 @@
 import { extname, resolve } from 'path'
+import { rmSync } from 'fs'
 import process from 'node:process'
 import * as childProcess from 'child_process'
 import FastGlob from 'fast-glob'
@@ -53,6 +54,8 @@ const latte = (params) => {
     params = lodash.merge(defaultParams, params)
 
     params.packageRoot = resolve(process.cwd(), params.packageRoot)
+
+    rmSync(resolve(params.packageRoot, 'temp'), { recursive: true, force: true })
 
     if (params.bin === 'docker') {
         params.bin = `docker run --rm --name index -v "${process.cwd()}":/usr/src/app -w /usr/src/app php:8-cli php`
