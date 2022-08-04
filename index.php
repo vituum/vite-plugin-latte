@@ -57,12 +57,29 @@ if (!file_exists($file)) {
     throw new Error('File not found ' . $file);
 }
 
-preg_match('/<script\b[^>]*>([\s\S]+)<\/script>/', file_get_contents($file), $fileContents);
+if (!str_ends_with($file, '.json.html') && !str_ends_with($file, '.json') && !str_ends_with($file, '.latte.html') && !str_ends_with($file, '.latte')) {
+    preg_match('/<script\b[^>]*>([\s\S]+)<\/script>/', file_get_contents($file), $fileContents);
 
-try {
-    $params[] = json_decode($fileContents[1], true, 512, JSON_THROW_ON_ERROR);
-} catch (JsonException $e) {
-    throw new Error('Error parsing params');
+    $fileContents = $fileContents[1];
+
+} else if (str_ends_with($file, '.latte.html')) {
+    if (file_exists(str_replace('.latte.html', '.latte.json', $file))) {
+        $fileContents = file_get_contents(str_replace('.latte.html', '.latte.json', $file));
+    }
+} else if (str_ends_with($file, '.latte')) {
+    if (file_exists(str_replace('.latte', '.latte.json', $file))) {
+        $fileContents = file_get_contents(str_replace('.latte', '.latte.json', $file));
+    }
+} else {
+    $fileContents = file_get_contents($file);
+}
+
+if (isset($fileContents)) {
+    try {
+        $params[] = json_decode($fileContents, true, 512, JSON_THROW_ON_ERROR);
+    } catch (JsonException $e) {
+        throw new Error('Error parsing params');
+    }
 }
 
 $params = array_replace_recursive(...$params);
