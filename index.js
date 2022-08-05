@@ -70,6 +70,20 @@ const latte = (params = {}) => {
         transformIndexHtml: {
             enforce: 'pre',
             async transform(content, { path, server }) {
+                if (
+                    !path.endsWith('.json.html') &&
+                    !path.endsWith('.latte.html') &&
+                    !path.endsWith('.json') &&
+                    !path.endsWith('.latte') &&
+                    !content.startsWith('<script type="application/json"')
+                ) {
+                    return content
+                }
+
+                if (content.startsWith('<script type="application/json"') && !content.includes('data-format="latte"')) {
+                    return content
+                }
+
                 const renderLatte = renderTemplate(path, params)
 
                 if (renderLatte.error) {
