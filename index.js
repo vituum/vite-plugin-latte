@@ -1,4 +1,5 @@
-import { extname, resolve } from 'path'
+import { extname, resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
 import { rmSync } from 'fs'
 import process from 'node:process'
 import * as childProcess from 'child_process'
@@ -11,8 +12,7 @@ const defaultParams = {
     functions: {},
     tags: {},
     globals: {},
-    data: '',
-    packageRoot: ''
+    data: ''
 }
 
 const execSync = (cmd) => {
@@ -53,7 +53,7 @@ const latte = (params = {}) => {
 
     params = lodash.merge(defaultParams, params)
 
-    params.packageRoot = resolve(process.cwd(), params.packageRoot)
+    params.packageRoot = dirname((fileURLToPath(import.meta.url)))
 
     rmSync(resolve(params.packageRoot, 'temp'), { recursive: true, force: true })
 
