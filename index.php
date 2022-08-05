@@ -29,6 +29,17 @@ if ($isDocker) {
 
 define("PACKAGE_DIR", str_replace($config->cwd, ROOT_DIR, $config->packageRoot));
 
+/**
+ * @throws JsonException
+ */
+function NodeHandler($name, ...$params) : string {
+    array_unshift($params, $name);
+
+    exec('node '. PACKAGE_DIR .'/handler.js ' . json_encode(json_encode($params, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR), $output);
+
+    return $output[0] ?? $params[1];
+}
+
 if (!file_exists(__DIR__ . '/temp') && !mkdir($concurrentDirectory = __DIR__ . '/temp') && !is_dir($concurrentDirectory)) {
     throw new Error(sprintf('Directory "%s" was not created', $concurrentDirectory));
 }
@@ -52,6 +63,7 @@ foreach ($config->data as $dataPath) {
 }
 
 $file = str_replace($config->cwd, ROOT_DIR, $file);
+$withoutTemplate = false;
 
 if (!file_exists($file)) {
     throw new Error('File not found ' . $file);
@@ -66,10 +78,14 @@ if (!str_ends_with($file, '.json.html') && !str_ends_with($file, '.json') && !st
     if (file_exists(str_replace('.latte.html', '.latte.json', $file))) {
         $fileContents = file_get_contents(str_replace('.latte.html', '.latte.json', $file));
     }
+
+    $withoutTemplate = true;
 } else if (str_ends_with($file, '.latte')) {
     if (file_exists(str_replace('.latte', '.latte.json', $file))) {
         $fileContents = file_get_contents(str_replace('.latte', '.latte.json', $file));
     }
+
+    $withoutTemplate = true;
 } else {
     $fileContents = file_get_contents($file);
 }
@@ -91,15 +107,8 @@ try {
     throw new Error('Error parsing params');
 }
 
-/**
- * @throws JsonException
- */
-function NodeHandler($name, ...$params) : string {
-    array_unshift($params, $name);
-
-    exec('node '. PACKAGE_DIR .'/handler.js ' . json_encode(json_encode($params, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR), $output);
-
-    return $output[0] ?? $params[1];
+if ($withoutTemplate) {
+    $params->template = $file;
 }
 
 foreach (['tel', 'asset'] as $filter) {
