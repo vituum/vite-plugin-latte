@@ -107,6 +107,10 @@ try {
     throw new Error('Error parsing params');
 }
 
+if ($withoutTemplate) {
+    $params->template = $file;
+}
+
 foreach (['tel', 'asset'] as $filter) {
     require PACKAGE_DIR . '/latte/' . ucfirst($filter) . 'Filter.php';
     $latte->addFilter($filter, 'App\Latte\\' . ucfirst($filter) . 'Filter::execute');
