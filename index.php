@@ -107,10 +107,6 @@ try {
     throw new Error('Error parsing params');
 }
 
-if ($withoutTemplate) {
-    $params->template = $file;
-}
-
 foreach (['tel', 'asset'] as $filter) {
     require PACKAGE_DIR . '/latte/' . ucfirst($filter) . 'Filter.php';
     $latte->addFilter($filter, 'App\Latte\\' . ucfirst($filter) . 'Filter::execute');
@@ -156,4 +152,11 @@ if (!file_exists(str_replace($config->cwd, ROOT_DIR, $params->template))) {
     throw new Error('File not found ' . str_replace($config->cwd, ROOT_DIR, $params->template));
 }
 
+if (isset($config->isString) && $config->isString) {
+    $latte->setLoader(new Latte\Loaders\StringLoader([
+        str_replace($config->cwd, ROOT_DIR, $params->template) => $config->content
+    ]));
+}
+
 echo $latte->renderToString(str_replace($config->cwd, ROOT_DIR, $params->template), $params);
+

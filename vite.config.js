@@ -3,57 +3,54 @@ import FastGlob from 'fast-glob'
 import latte from './index.js'
 import fs from 'fs'
 
-let format = 'latte'
-
 const middleware = {
     name: 'middleware',
     apply: 'serve',
     configureServer(viteDevServer) {
+        const supportedFormats = ['json', 'latte', 'twig']
+
         return () => {
             viteDevServer.middlewares.use(async(req, res, next) => {
+                let format = null
+                let transformedUrl = req.originalUrl.replace('.html', '')
+
                 if (req.originalUrl === '/' || req.originalUrl.endsWith('/')) {
-                    req.originalUrl = req.originalUrl + 'index'
+                    transformedUrl = transformedUrl + 'index'
                 }
 
-                if (!req.originalUrl.startsWith('/views')) {
-                    req.originalUrl = '/views' + req.originalUrl
+                if (!req.originalUrl.startsWith('/views') && !req.originalUrl.startsWith('/emails')) {
+                    transformedUrl = '/views' + transformedUrl
                 }
 
-                const transformedUrl = req.originalUrl.replace('.html', '')
+                supportedFormats.every(supportedFormat => {
+                    if (fs.existsSync(join(viteDevServer.config.root, `${transformedUrl}.${supportedFormat}`)) || fs.existsSync(join(viteDevServer.config.root, `${transformedUrl}.${supportedFormat}.html`))) {
+                        format = supportedFormat
+                        return false
+                    } else {
+                        return true
+                    }
+                })
 
-                if (fs.existsSync(join(viteDevServer.config.root, `${transformedUrl}.latte`)) || fs.existsSync(join(viteDevServer.config.root, `${transformedUrl}.latte.html`))) {
-                    format = 'latte'
+                if (format) {
+                    transformedUrl = transformedUrl + `.${format}.html`
+                } else {
+                    transformedUrl = transformedUrl + '.html'
                 }
 
-                if (fs.existsSync(join(viteDevServer.config.root, `${transformedUrl}.json`)) || fs.existsSync(join(viteDevServer.config.root, `${transformedUrl}.json.html`))) {
-                    format = 'json'
-                }
+                if (fs.existsSync(join(viteDevServer.config.root, transformedUrl.replace('.html', ''))) && format) {
+                    const output = await viteDevServer.transformIndexHtml(transformedUrl.replace('.html', ''), fs.readFileSync(join(viteDevServer.config.root, transformedUrl.replace('.html', ''))).toString())
+                    console.log(transformedUrl.replace('.html', ''), output)
 
-                if (!req.originalUrl.endsWith('.html')) {
-                    req.originalUrl = req.originalUrl + `.${format}.html`
-                } else if (req.originalUrl.endsWith('.html')) {
-                    req.originalUrl = req.originalUrl.replace('.html', `.${format}.html`)
-                }
-
-                const templatePath = join(viteDevServer.config.root, req.originalUrl.replace('.html', ''))
-
-                if (fs.existsSync(templatePath) && !req.originalUrl.includes('.latte.json')) {
-                    const output = await viteDevServer.transformIndexHtml(req.originalUrl.replace('.html', ''), '')
-
-                    if (req.originalUrl.startsWith('/views/dialog')) {
+                    if (transformedUrl.startsWith('/views/dialog')) {
                         res.setHeader('Content-Type', 'application/json')
+                    } else {
+                        res.setHeader('Content-Type', 'text/html')
                     }
 
                     res.statusCode = 200
                     res.end(output)
-                } else if (fs.existsSync(templatePath + '.html')) {
-                    req.url = req.originalUrl
-
-                    next()
                 } else {
-                    req.originalUrl = req.originalUrl.replace(`.${format}`, '')
-
-                    req.url = req.originalUrl
+                    req.url = transformedUrl
 
                     next()
                 }
@@ -76,7 +73,8 @@ export default {
                 template: resolve(process.cwd(), 'playground/templates/Layout/Main.latte'),
                 srcPath: resolve(process.cwd(), 'playground')
             },
-            data: './playground/data/**/*.json'
+            data: './playground/data/**/*.json',
+            isStringFilter: (filename) => filename.endsWith('.latte')
         })
     ],
     resolve: {

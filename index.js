@@ -12,7 +12,8 @@ const defaultParams = {
     functions: {},
     tags: {},
     globals: {},
-    data: ''
+    data: '',
+    isStringFilter: undefined
 }
 
 const execSync = (cmd) => {
@@ -69,7 +70,7 @@ const latte = (params = {}) => {
         },
         transformIndexHtml: {
             enforce: 'pre',
-            async transform(content, { path, server }) {
+            async transform(content, { path, filename, server }) {
                 if (
                     !path.endsWith('.json.html') &&
                     !path.endsWith('.latte.html') &&
@@ -83,6 +84,14 @@ const latte = (params = {}) => {
                 if (content.startsWith('<script type="application/json"') && !content.includes('data-format="latte"')) {
                     return content
                 }
+
+                if (typeof params.isStringFilter === 'function' && params.isStringFilter(filename)) {
+                    params.isString = true
+                } else {
+                    params.isString = false
+                }
+
+                params.content = content
 
                 const renderLatte = renderTemplate(path, params)
 
