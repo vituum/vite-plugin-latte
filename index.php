@@ -157,8 +157,15 @@ if (!file_exists(str_replace($config->cwd, ROOT_DIR, $params->template))) {
 }
 
 if (isset($config->isString) && $config->isString) {
+    if (isset($config->contentTimestamp)) {
+        $content = file_get_contents(__DIR__ . '/temp/' . $config->contentTimestamp . '.html');
+        unlink(__DIR__ . '/temp/' . $config->contentTimestamp . '.html');
+    } else {
+        $content = '';
+    }
+
     $latte->setLoader(new Latte\Loaders\StringLoader([
-        str_replace($config->cwd, ROOT_DIR, $params->template) => $config->content
+        str_replace($config->cwd, ROOT_DIR, $params->template) => $content
     ]));
 }
 

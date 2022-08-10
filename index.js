@@ -1,6 +1,6 @@
 import { extname, resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { rmSync } from 'fs'
+import fs from 'fs'
 import process from 'node:process'
 import * as childProcess from 'child_process'
 import FastGlob from 'fast-glob'
@@ -29,7 +29,7 @@ const execSync = (cmd) => {
     }
 }
 
-const renderTemplate = (path, params) => {
+const renderTemplate = (path, params, content) => {
     if (params.data) {
         params.data = FastGlob.sync(params.data).map(entry => resolve(process.cwd(), entry))
     }
@@ -46,6 +46,18 @@ const renderTemplate = (path, params) => {
         }
     })
 
+    if (params.isString) {
+        const timestamp = Math.floor(Date.now() * Math.random())
+
+        params.contentTimestamp = timestamp
+
+        if (!fs.existsSync(resolve(params.packageRoot, 'temp'))) {
+            fs.mkdirSync(resolve(params.packageRoot, 'temp'))
+        }
+
+        fs.writeFileSync(resolve(params.packageRoot, `temp/${timestamp}.html`), content)
+    }
+
     return execSync(`${params.bin} ${params.packageRoot}/index.php ${params.root + path} ${JSON.stringify(JSON.stringify(params))}`)
 }
 
@@ -56,7 +68,9 @@ const latte = (params = {}) => {
 
     params.packageRoot = dirname((fileURLToPath(import.meta.url)))
 
-    rmSync(resolve(params.packageRoot, 'temp'), { recursive: true, force: true })
+    if (fs.existsSync(resolve(params.packageRoot, 'temp'))) {
+        fs.rmSync(resolve(params.packageRoot, 'temp'), { recursive: true, force: true })
+    }
 
     if (params.bin === 'docker') {
         params.bin = `docker run --rm --name index -v "${process.cwd()}":/usr/src/app -w /usr/src/app php:8-cli php`
@@ -91,11 +105,14 @@ const latte = (params = {}) => {
                     params.isString = false
                 }
 
-                params.content = content
-
-                const renderLatte = renderTemplate(path, params)
+                const renderLatte = renderTemplate(path, params, content)
 
                 if (renderLatte.error) {
+                    if (!server) {
+                        console.error(renderLatte.output)
+                        return
+                    }
+
                     server.ws.send({
                         type: 'error',
                         err: {

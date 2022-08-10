@@ -39,7 +39,6 @@ const middleware = {
 
                 if (fs.existsSync(join(viteDevServer.config.root, transformedUrl.replace('.html', ''))) && format) {
                     const output = await viteDevServer.transformIndexHtml(transformedUrl.replace('.html', ''), fs.readFileSync(join(viteDevServer.config.root, transformedUrl.replace('.html', ''))).toString())
-                    console.log(transformedUrl.replace('.html', ''), output)
 
                     if (transformedUrl.startsWith('/views/dialog')) {
                         res.setHeader('Content-Type', 'application/json')
