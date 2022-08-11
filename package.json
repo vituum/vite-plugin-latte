@@ -1,5 +1,5 @@
 {
-  "name": "vite-plugin-latte",
+  "name": "@vituum/vite-plugin-latte",
   "version": "0.1.8",
   "type": "module",
   "main": "index.js",
