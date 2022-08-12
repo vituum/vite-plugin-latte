@@ -13,7 +13,11 @@ const defaultParams = {
     tags: {},
     globals: {},
     data: '',
-    isStringFilter: undefined
+    isStringFilter: undefined,
+    filetypes: {
+        html: /.(json.html|latte.json.html|latte.html)$/,
+        json: /.(json.latte.html)$/
+    }
 }
 
 const execSync = (cmd) => {
@@ -78,7 +82,7 @@ const latte = (params = {}) => {
 
     return {
         _params: params,
-        name: 'vite-plugin-latte',
+        name: '@vituum/vite-plugin-latte',
         config: ({ root }) => {
             params.root = root
         },
@@ -86,10 +90,8 @@ const latte = (params = {}) => {
             enforce: 'pre',
             async transform(content, { path, filename, server }) {
                 if (
-                    !path.endsWith('.json.html') &&
-                    !path.endsWith('.latte.html') &&
-                    !path.endsWith('.json') &&
-                    !path.endsWith('.latte') &&
+                    !params.filetypes.html.test(path) &&
+                    !params.filetypes.json.test(path) &&
                     !content.startsWith('<script type="application/json"')
                 ) {
                     return content
@@ -117,7 +119,7 @@ const latte = (params = {}) => {
                         type: 'error',
                         err: {
                             message: renderLatte.output,
-                            plugin: 'vite-plugin-latte'
+                            plugin: '@vituum/vite-plugin-latte'
                         }
                     })
 

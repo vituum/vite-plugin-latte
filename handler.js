@@ -6,4 +6,4 @@ const name = params[0]
 
 params.shift()
 
-vite.plugins.filter(({ name }) => name === 'vite-plugin-latte')[0]._params.filters[name](...params)
+vite.plugins.filter(({ name }) => name === '@vituum/vite-plugin-latte')[0]._params.filters[name](...params)
