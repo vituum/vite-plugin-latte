@@ -7,6 +7,8 @@ import FastGlob from 'fast-glob'
 import lodash from 'lodash'
 
 const defaultParams = {
+    reload: true,
+    root: null,
     bin: 'php',
     filters: {},
     functions: {},
@@ -84,7 +86,9 @@ const latte = (params = {}) => {
         _params: params,
         name: '@vituum/vite-plugin-latte',
         config: ({ root }) => {
-            params.root = root
+            if (!params.root) {
+                params.root = root
+            }
         },
         transformIndexHtml: {
             enforce: 'pre',
@@ -92,12 +96,8 @@ const latte = (params = {}) => {
                 if (
                     !params.filetypes.html.test(path) &&
                     !params.filetypes.json.test(path) &&
-                    !content.startsWith('<script type="application/json"')
+                    !content.startsWith('<script type="application/json" data-format="latte"')
                 ) {
-                    return content
-                }
-
-                if (content.startsWith('<script type="application/json"') && !content.includes('data-format="latte"')) {
                     return content
                 }
 
@@ -122,15 +122,16 @@ const latte = (params = {}) => {
                             plugin: '@vituum/vite-plugin-latte'
                         }
                     })
-
-                    return
                 }
 
                 return renderLatte.output
             }
         },
         handleHotUpdate({ file, server }) {
-            if (extname(file) === '.latte' || extname(file) === '.html' || extname(file) === '.json') {
+            if (
+                typeof params.reload === 'function' && params.reload(file) ||
+                params.reload && (params.filetypes.html.test(file) || params.filetypes.json.test(file))
+            ) {
                 server.ws.send({ type: 'full-reload' })
             }
         }
