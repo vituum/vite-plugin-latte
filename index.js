@@ -93,6 +93,9 @@ const latte = (params = {}) => {
         transformIndexHtml: {
             enforce: 'pre',
             async transform(content, { path, filename, server }) {
+                path = path.replace('?raw', '')
+                filename = filename.replace('?raw', '')
+
                 if (
                     !params.filetypes.html.test(path) &&
                     !params.filetypes.json.test(path) &&
@@ -129,8 +132,8 @@ const latte = (params = {}) => {
         },
         handleHotUpdate({ file, server }) {
             if (
-                typeof params.reload === 'function' && params.reload(file) ||
-                params.reload && (params.filetypes.html.test(file) || params.filetypes.json.test(file))
+                (typeof params.reload === 'function' && params.reload(file)) ||
+                (typeof params.reload === 'boolean' && params.reload && (params.filetypes.html.test(file) || params.filetypes.json.test(file)))
             ) {
                 server.ws.send({ type: 'full-reload' })
             }
