@@ -1,9 +1,12 @@
 import { resolve } from 'path'
 
 const vite = (await import(resolve(process.cwd(), 'vite.config.js'))).default
-const params = JSON.parse(process.argv[2])
-const name = params[0]
+let params = JSON.parse(process.argv[4])
+const name = process.argv[2]
+const type = process.argv[3]
 
-params.shift()
+params = params.map(value => Buffer.from(value, 'base64').toString('utf-8'))
 
-vite.plugins.filter(({ name }) => name === '@vituum/vite-plugin-latte')[0]._params.filters[name](...params)
+const output = await vite.plugins.filter(({ name }) => name === '@vituum/vite-plugin-latte')[0]._params[type][name](...params)
+
+console.log(Buffer.from(output.toString(), 'utf-8').toString('base64'))

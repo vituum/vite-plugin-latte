@@ -1,10 +1,11 @@
-import { extname, resolve, dirname } from 'path'
+import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
 import process from 'node:process'
 import * as childProcess from 'child_process'
 import FastGlob from 'fast-glob'
 import lodash from 'lodash'
+import chalk from 'chalk'
 
 const defaultParams = {
     reload: true,
@@ -96,6 +97,8 @@ const latte = (params = {}) => {
                 path = path.replace('?raw', '')
                 filename = filename.replace('?raw', '')
 
+                const start = new Date()
+
                 if (
                     !params.filetypes.html.test(path) &&
                     !params.filetypes.json.test(path) &&
@@ -111,20 +114,27 @@ const latte = (params = {}) => {
                 }
 
                 const renderLatte = renderTemplate(path, params, content)
+                const warningLog = renderLatte.output.includes('Warning: Undefined')
 
-                if (renderLatte.error) {
+                console.info(`${chalk.cyan('@vituum/vite-plugin-latte')} ${chalk.green(`finished in ${chalk.grey(new Date() - start + 'ms')}`)}`)
+
+                if (renderLatte.error || warningLog) {
                     if (!server) {
                         console.error(renderLatte.output)
                         return
                     }
 
+                    const message = warningLog ? 'Warning: Undefined' + renderLatte.output.split('Warning: Undefined').pop() : renderLatte.output
+
                     server.ws.send({
                         type: 'error',
                         err: {
-                            message: renderLatte.output,
+                            message,
                             plugin: '@vituum/vite-plugin-latte'
                         }
                     })
+
+                    return
                 }
 
                 return renderLatte.output

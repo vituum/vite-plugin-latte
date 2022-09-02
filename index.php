@@ -32,12 +32,12 @@ define("PACKAGE_DIR", str_replace($config->cwd, ROOT_DIR, $config->packageRoot))
 /**
  * @throws JsonException
  */
-function NodeHandler($name, ...$params) : string {
-    array_unshift($params, $name);
+function NodeHandler($name, $type, ...$params) : string {
+	$params = array_map(static function($value) { return base64_encode((string)$value); }, $params);
 
-    exec('node '. PACKAGE_DIR .'/handler.js ' . json_encode(json_encode($params, JSON_THROW_ON_ERROR), JSON_THROW_ON_ERROR), $output);
+	exec('node '. PACKAGE_DIR .'/handler.js ' . $name . ' ' . $type .' ' . json_encode(json_encode($params, JSON_HEX_QUOT | JSON_HEX_TAG), JSON_THROW_ON_ERROR), $output);
 
-    return $output[0] ?? $params[1];
+	return base64_decode($output[0] ?? '') ?? $params[1];
 }
 
 if (!file_exists(__DIR__ . '/temp') && !mkdir($concurrentDirectory = __DIR__ . '/temp') && !is_dir($concurrentDirectory)) {
@@ -127,7 +127,7 @@ foreach ($config->filters  as $filter => $path) {
         $latte->addFilter($filter, 'App\Latte\\' . ucfirst($filter) . 'Filter::execute');
     } elseif (!$isDocker) {
         $latte->addFilter($filter, function (...$params) use ($filter) : string {
-            return NodeHandler($filter, ...$params);
+            return NodeHandler($filter, 'filters', ...$params);
         });
     }
 }
@@ -138,7 +138,7 @@ foreach ($config->functions  as $function => $path) {
         $latte->addFunction($function, 'App\Latte\\' . ucfirst($function) . 'Function::execute');
     }  elseif (!$isDocker) {
         $latte->addFunction($function, function (...$params) use ($function) : string {
-            return NodeHandler($function, ...$params);
+            return NodeHandler($function, 'functions', ...$params);
         });
     }
 }

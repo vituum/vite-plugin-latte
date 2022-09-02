@@ -1,6 +1,6 @@
 {
   "name": "@vituum/vite-plugin-latte",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "fast-glob": "^3.2.11",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "chalk": "^5.0.1"
   },
   "devDependencies": {
     "vite": "^3.0.9",
