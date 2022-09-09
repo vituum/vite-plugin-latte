@@ -143,6 +143,12 @@ foreach ($config->functions  as $function => $path) {
     }
 }
 
+$translator = static function (string $original): string {
+	return $original;
+};
+
+$latte->addExtension(new Latte\Essential\TranslatorExtension($translator));
+
 $tag = 'json';
 require PACKAGE_DIR . '/latte/' . ucfirst($tag) . 'Tag.php';
 eval('$latte->addExtension(new App\Latte\\' . ucfirst($tag) . 'Extension);');
