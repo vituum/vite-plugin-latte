@@ -97,7 +97,7 @@ const latte = (params = {}) => {
                 path = path.replace('?raw', '')
                 filename = filename.replace('?raw', '')
 
-                const start = new Date()
+                // const start = new Date()
 
                 if (
                     !params.filetypes.html.test(path) &&
@@ -116,7 +116,7 @@ const latte = (params = {}) => {
                 const renderLatte = renderTemplate(path, params, content)
                 const warningLog = renderLatte.output.includes('Warning: Undefined')
 
-                console.info(`${chalk.cyan('@vituum/vite-plugin-latte')} ${chalk.green(`finished in ${chalk.grey(new Date() - start + 'ms')}`)}`)
+                // console.info(`${chalk.cyan('@vituum/vite-plugin-latte')} ${chalk.green(`finished in ${chalk.grey(new Date() - start + 'ms')}`)}`)
 
                 if (renderLatte.error || warningLog) {
                     if (!server) {
