@@ -126,15 +126,13 @@ const latte = (params = {}) => {
 
                     const message = warningLog ? 'Warning: Undefined' + renderLatte.output.split('Warning: Undefined').pop() : renderLatte.output
 
-                    server.ws.send({
+                    setTimeout(() => server.ws.send({
                         type: 'error',
                         err: {
                             message,
                             plugin: '@vituum/vite-plugin-latte'
                         }
-                    })
-
-                    return
+                    }), 50)
                 }
 
                 return renderLatte.output
