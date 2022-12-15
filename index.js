@@ -38,7 +38,9 @@ const execSync = (cmd) => {
 
 const renderTemplate = (path, params, content) => {
     if (params.data) {
-        params.data = FastGlob.sync(params.data).map(entry => resolve(process.cwd(), entry))
+        const normalizePaths = Array.isArray(params.data) ? params.data.map(path => path.replace(/\\/g, '/')) : params.data.replace(/\\/g, '/')
+
+        params.data = FastGlob.sync(normalizePaths).map(entry => resolve(process.cwd(), entry))
     }
 
     Object.keys(params.filters).forEach(key => {
