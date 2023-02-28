@@ -101,7 +101,7 @@ const latte = (params = {}) => {
                 path = path.replace('?raw', '')
                 filename = filename.replace('?raw', '')
 
-                if (params.ignoredPaths.filter(ignoredPaths => minimatch(path, ignoredPaths)).length !== 0) {
+                if (params.ignoredPaths.filter(ignoredPaths => minimatch(path.replace('.html', '').replace('.vituum', ''), ignoredPaths)).length !== 0) {
                     return content
                 }
 
