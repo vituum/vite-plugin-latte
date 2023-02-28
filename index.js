@@ -5,6 +5,7 @@ import process from 'node:process'
 import * as childProcess from 'child_process'
 import FastGlob from 'fast-glob'
 import lodash from 'lodash'
+import { minimatch } from 'minimatch'
 import chalk from 'chalk'
 
 const defaultParams = {
@@ -17,6 +18,7 @@ const defaultParams = {
     globals: {},
     data: '',
     isStringFilter: undefined,
+    ignoredPaths: [],
     filetypes: {
         html: /.(json.html|latte.json.html|latte.html)$/,
         json: /.(json.latte.html)$/
@@ -99,7 +101,9 @@ const latte = (params = {}) => {
                 path = path.replace('?raw', '')
                 filename = filename.replace('?raw', '')
 
-                // const start = new Date()
+                if (params.ignoredPaths.filter(ignoredPaths => minimatch(path, ignoredPaths)).length !== 0) {
+                    return content
+                }
 
                 if (
                     !params.filetypes.html.test(path) &&
@@ -118,11 +122,9 @@ const latte = (params = {}) => {
                 const renderLatte = renderTemplate(path, params, content)
                 const warningLog = renderLatte.output.includes('Warning: Undefined')
 
-                // console.info(`${chalk.cyan('@vituum/vite-plugin-latte')} ${chalk.green(`finished in ${chalk.grey(new Date() - start + 'ms')}`)}`)
-
                 if (renderLatte.error || warningLog) {
                     if (!server) {
-                        console.error(renderLatte.output)
+                        console.error(chalk.red(renderLatte.output))
                         return
                     }
 
