@@ -23,8 +23,10 @@ $isDocker = str_starts_with($config->bin, 'docker');
 
 if ($isDocker) {
     define("ROOT_DIR", '/usr/src/app/');
+    define("TEMPLATES_DIR", '/usr/src/app/src/templates/');
 } else {
     define("ROOT_DIR", $config->cwd . '/');
+    define("TEMPLATES_DIR", $config->cwd . '/src/templates/');
 }
 
 define("PACKAGE_DIR", str_replace($config->cwd, ROOT_DIR, $config->packageRoot));

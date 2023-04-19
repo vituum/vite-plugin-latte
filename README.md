@@ -1,5 +1,5 @@
-<a href="https://npmjs.com/package/vite-plugin-latte"><img src="https://img.shields.io/npm/v/vite-plugin-latte.svg" alt="npm package"></a>
-<a href="https://nodejs.org/en/about/releases/"><img src="https://img.shields.io/node/v/vite-plugin-latte.svg" alt="node compatility"></a>
+<a href="https://npmjs.com/package/@vituum/vite-plugin-latte"><img src="https://img.shields.io/npm/v/@vituum/vite-plugin-latte.svg" alt="npm package"></a>
+<a href="https://nodejs.org/en/about/releases/"><img src="https://img.shields.io/node/v/@vituum/vite-plugin-latte.svg" alt="node compatility"></a>
 
 # ⚡️☕ ViteLatte
 
