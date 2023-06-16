@@ -9,7 +9,7 @@ export default {
             filters: {
                 icon: 'latte/IconFilter.php',
                 hello: (value, there) => {
-                    console.log('Hello ' + there + ' ' + value)
+                    return 'Hello ' + there + ' ' + value
                 }
             },
             globals: {
