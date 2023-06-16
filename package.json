@@ -1,6 +1,6 @@
 {
   "name": "@vituum/vite-plugin-latte",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.3",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -26,8 +26,13 @@
     "handler.js",
     "index.php",
     "latte",
-    "vendor"
+    "vendor",
+    "types"
   ],
+  "exports": {
+    ".": "./index.js",
+    "./types": "./types/*"
+  },
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"

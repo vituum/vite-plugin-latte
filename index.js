@@ -40,8 +40,8 @@ const execSync = (cmd) => {
     }
 }
 
-const renderTemplate = ({ path, filename, cwd, packageRoot }, params, content) => {
-    const renderTransformedHtml = params.renderTransformedHtml(filename)
+const renderTemplate = ({ server, path, filename, cwd, packageRoot }, params, content) => {
+    const renderTransformedHtml = params.renderTransformedHtml(server ? filename.replace('.html', '') : filename)
 
     if (params.data) {
         const normalizePaths = Array.isArray(params.data) ? params.data.map(path => path.replace(/\\/g, '/')) : params.data.replace(/\\/g, '/')
@@ -73,7 +73,7 @@ const renderTemplate = ({ path, filename, cwd, packageRoot }, params, content) =
         fs.writeFileSync(resolve(packageRoot, `temp/${timestamp}.html`), content)
     }
 
-    return execSync(`${params.bin} ${packageRoot}/index.php ${join(params.root, path)} ${JSON.stringify(JSON.stringify(Object.assign({ packageRoot, cwd, renderTransformedHtml }, params)))}`)
+    return execSync(`${params.bin} ${packageRoot}/index.php ${join(params.root, server ? path.replace('.html', '') : path)} ${JSON.stringify(JSON.stringify(Object.assign({ packageRoot, cwd, renderTransformedHtml }, params)))}`)
 }
 
 /**
@@ -138,7 +138,7 @@ const plugin = (options = {}) => {
                     return content
                 }
 
-                const render = renderTemplate({ path, filename, cwd, packageRoot }, options, content)
+                const render = renderTemplate({ server, path, filename, cwd, packageRoot }, options, content)
                 const warningLog = render.output.includes('Warning: Undefined')
 
                 if (render.error || warningLog) {
