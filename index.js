@@ -11,7 +11,7 @@ import { renameBuildEnd, renameBuildStart } from 'vituum/utils/build.js'
 const { name } = getPackageInfo(import.meta.url)
 
 /**
- * @type {import('@vituum/vite-plugin-latte/types/index.d.ts').PluginUserConfig} options
+ * @type {import('@vituum/vite-plugin-latte/types').PluginUserConfig} options
  */
 const defaultOptions = {
     reload: true,
@@ -77,7 +77,7 @@ const renderTemplate = ({ server, path, filename, cwd, packageRoot }, params, co
 }
 
 /**
- * @param {import('@vituum/vite-plugin-latte/types/index.d.ts').PluginUserConfig} options
+ * @param {import('@vituum/vite-plugin-latte/types').PluginUserConfig} options
  * @returns [import('vite').Plugin]
  */
 const plugin = (options = {}) => {
@@ -127,9 +127,6 @@ const plugin = (options = {}) => {
         transformIndexHtml: {
             enforce: 'pre',
             async transform (content, { path, filename, server }) {
-                path = path.replace('?raw', '')
-                filename = filename.replace('?raw', '')
-
                 if (options.ignoredPaths.find(ignoredPath => minimatch(path.replace('.html', ''), ignoredPath) === true)) {
                     return content
                 }
