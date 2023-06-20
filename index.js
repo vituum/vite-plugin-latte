@@ -73,7 +73,9 @@ const renderTemplate = ({ server, path, filename, cwd, packageRoot }, params, co
         fs.writeFileSync(resolve(packageRoot, `temp/${timestamp}.html`), content)
     }
 
-    return execSync(`${params.bin} ${packageRoot}/index.php ${join(params.root, server ? path.replace('.html', '') : path)} ${JSON.stringify(JSON.stringify(Object.assign({ packageRoot, cwd, renderTransformedHtml }, params)))}`)
+    const data = Object.assign({ packageRoot, cwd, isRenderTransformedHtml: renderTransformedHtml }, params)
+
+    return execSync(`${params.bin} ${packageRoot}/index.php ${join(params.root, server ? path.replace('.html', '') : path)} ${JSON.stringify(JSON.stringify(data))}`)
 }
 
 /**
