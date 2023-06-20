@@ -19,7 +19,9 @@ const defaultOptions = {
     filters: {},
     functions: {},
     tags: {},
-    globals: {},
+    globals: {
+        format: 'latte'
+    },
     data: ['src/data/**/*.json'],
     formats: ['latte', 'json.latte', 'json'],
     bin: 'php',
@@ -40,31 +42,31 @@ const execSync = (cmd) => {
     }
 }
 
-const renderTemplate = ({ server, path, filename, cwd, packageRoot }, params, content) => {
-    const renderTransformedHtml = params.renderTransformedHtml(server ? filename.replace('.html', '') : filename)
+const renderTemplate = ({ server, path, filename, cwd, packageRoot }, options, content) => {
+    const renderTransformedHtml = options.renderTransformedHtml(server ? filename.replace('.html', '') : filename)
 
-    if (params.data) {
-        const normalizePaths = Array.isArray(params.data) ? params.data.map(path => path.replace(/\\/g, '/')) : params.data.replace(/\\/g, '/')
+    if (options.data) {
+        const normalizePaths = Array.isArray(options.data) ? options.data.map(path => path.replace(/\\/g, '/')) : options.data.replace(/\\/g, '/')
 
-        params.data = FastGlob.sync(normalizePaths).map(entry => resolve(process.cwd(), entry))
+        options.data = FastGlob.sync(normalizePaths).map(entry => resolve(process.cwd(), entry))
     }
 
-    Object.keys(params.filters).forEach(key => {
-        if (typeof params.filters[key] === 'function') {
-            params.filters[key] = params.filters[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
+    Object.keys(options.filters).forEach(key => {
+        if (typeof options.filters[key] === 'function') {
+            options.filters[key] = options.filters[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
         }
     })
 
-    Object.keys(params.functions).forEach(key => {
-        if (typeof params.functions[key] === 'function') {
-            params.functions[key] = params.functions[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
+    Object.keys(options.functions).forEach(key => {
+        if (typeof options.functions[key] === 'function') {
+            options.functions[key] = options.functions[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
         }
     })
 
     if (renderTransformedHtml) {
         const timestamp = Math.floor(Date.now() * Math.random())
 
-        params.contentTimestamp = timestamp
+        options.contentTimestamp = timestamp
 
         if (!fs.existsSync(resolve(packageRoot, 'temp'))) {
             fs.mkdirSync(resolve(packageRoot, 'temp'))
@@ -73,9 +75,9 @@ const renderTemplate = ({ server, path, filename, cwd, packageRoot }, params, co
         fs.writeFileSync(resolve(packageRoot, `temp/${timestamp}.html`), content)
     }
 
-    const data = Object.assign({ packageRoot, cwd, isRenderTransformedHtml: renderTransformedHtml }, params)
+    const data = Object.assign({ packageRoot, cwd, isRenderTransformedHtml: renderTransformedHtml }, options)
 
-    return execSync(`${params.bin} ${packageRoot}/index.php ${join(params.root, server ? path.replace('.html', '') : path)} ${JSON.stringify(JSON.stringify(data))}`)
+    return execSync(`${options.bin} ${packageRoot}/index.php ${join(options.root, server ? path.replace('.html', '') : path)} ${JSON.stringify(JSON.stringify(data))}`)
 }
 
 /**
@@ -134,6 +136,11 @@ const plugin = (options = {}) => {
                 }
 
                 if (!options.formats.find(format => path.endsWith(`${format}.html`))) {
+                    return content
+                }
+
+                // @ts-ignore
+                if (!options.formats.includes(options.globals.format)) {
                     return content
                 }
 
