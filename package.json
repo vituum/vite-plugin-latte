@@ -1,6 +1,6 @@
 {
   "name": "@vituum/vite-plugin-latte",
-  "version": "1.0.0-alpha.9",
+  "version": "1.0.0-alpha.10",
   "type": "module",
   "main": "index.js",
   "scripts": {
