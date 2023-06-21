@@ -135,12 +135,10 @@ const plugin = (options = {}) => {
                     return content
                 }
 
-                if (!options.formats.find(format => path.endsWith(`${format}.html`))) {
-                    return content
-                }
-
-                // @ts-ignore
-                if (!options.formats.includes(options.globals.format)) {
+                if (
+                    !options.formats.find(format => filename.replace('.html', '').endsWith(format)) ||
+                    (filename.replace('.html', '').endsWith('.json') && !content.startsWith('{'))
+                ) {
                     return content
                 }
 
