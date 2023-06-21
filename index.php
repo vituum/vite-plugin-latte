@@ -42,6 +42,14 @@ function NodeHandler($name, $type, ...$params) : string {
 	return base64_decode($output[0] ?? '') ?? $params[1];
 }
 
+function NodeHandlerSingle($path, ...$params) : string {
+    $params = array_map(static function($value) { return base64_encode((string)$value); }, $params);
+
+    exec('node '. PACKAGE_DIR .'/handler-single.js ' . $path . ' ' . json_encode(json_encode($params, JSON_HEX_QUOT | JSON_HEX_TAG), JSON_THROW_ON_ERROR), $output);
+
+    return base64_decode($output[0] ?? '') ?? $params[1];
+}
+
 if (!file_exists(__DIR__ . '/temp') && !mkdir($concurrentDirectory = __DIR__ . '/temp') && !is_dir($concurrentDirectory)) {
     throw new Error(sprintf('Directory "%s" was not created', $concurrentDirectory));
 }
@@ -124,10 +132,14 @@ foreach (['fetch', 'placeholder', 'randomColor'] as $function) {
 }
 
 foreach ($config->filters  as $filter => $path) {
-    if (is_string($path)) {
+    if (is_string($path) && str_ends_with($path, '.php')) {
         require ROOT_DIR . $path;
         $latte->addFilter($filter, 'App\Latte\\' . ucfirst($filter) . 'Filter::execute');
-    } elseif (!$isDocker) {
+    }  elseif (!$isDocker && is_string($path) && str_ends_with($path, '.js')) {
+        $latte->addFilter($filter, function (...$params) use ($path) : string {
+            return NodeHandlerSingle($path, ...$params);
+        });
+    }  elseif (!$isDocker) {
         $latte->addFilter($filter, function (...$params) use ($filter) : string {
             return NodeHandler($filter, 'filters', ...$params);
         });
@@ -135,9 +147,13 @@ foreach ($config->filters  as $filter => $path) {
 }
 
 foreach ($config->functions  as $function => $path) {
-    if (is_string($path)) {
+    if (is_string($path) && str_ends_with($path, '.php')) {
         require ROOT_DIR . $path;
         $latte->addFunction($function, 'App\Latte\\' . ucfirst($function) . 'Function::execute');
+    }  elseif (!$isDocker && is_string($path) && str_ends_with($path, '.js')) {
+        $latte->addFunction($function, function (...$params) use ($path) : string {
+            return NodeHandlerSingle($path, ...$params);
+        });
     }  elseif (!$isDocker) {
         $latte->addFunction($function, function (...$params) use ($function) : string {
             return NodeHandler($function, 'functions', ...$params);
