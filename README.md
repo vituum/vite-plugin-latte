@@ -7,50 +7,30 @@
 import latte from '@vituum/vite-plugin-latte'
 
 export default {
-  plugins: [
-    latte({
-      bin: 'php', // php or docker or your own binary path
-      filters: {
-        icon: 'latte/IconFilter.php',
-        nbsp: () => {}
-      },
-      functions: {},
-      tags: {},
-      globals: {
-          template: 'playground/templates/Layout/Main.latte'
-      },
-      data: '*.json',
-      isStringFilter: undefined,
-      filetypes: {
-          html: /.(json.html|latte.json.html|latte.html)$/,
-          json: /.(json.latte.html)$/
-      }
-    })
-  ]
+    plugins: [
+        latte()
+    ],
+    build: {
+        rollupOptions: {
+            input: ['index.latte.html']
+        }
+    }
 }
 ```
 
-Read the [docs](https://vituum.dev/config/integrations-options.html#vituum-latte) to learn more about the plugin options.
+* Read the [docs](https://vituum.dev/plugins/latte.html) to learn more about the plugin options.
+* Use with [Vituum](https://vituum.dev) to get multi-page support.
 
 ## Basic usage
 
 ```html
-<!-- index.html -->
-<script type="application/json">
-  {
-    "template": "path/to/template.latte",
-    "title": "Hello world"
-  }
-</script>
-```
-or
 ```html
-<!-- index.latte.html with index.latte.json -->
+<!-- index.latte with index.latte.json -->
 {$title}
 ```
 or
 ```html
-<!-- index.latte.html or index.latte.json.html  -->
+<!-- index.json  -->
 {
   "template": "path/to/template.latte",
   "title": "Hello world"
@@ -61,4 +41,4 @@ or
 
 - [Node.js LTS (16.x)](https://nodejs.org/en/download/)
 - [PHP (8.x)](https://www.php.net/) or [Docker PHP (8.x)](https://hub.docker.com/_/php)
-- [Vite](https://vitejs.dev/) or [Vituum](https://vituum.dev/)
+- [Vite](https://vitejs.dev/)

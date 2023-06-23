@@ -5,7 +5,15 @@ import process from 'node:process'
 import * as childProcess from 'node:child_process'
 import FastGlob from 'fast-glob'
 import { minimatch } from 'minimatch'
-import { getPackageInfo, pluginError, pluginReload, merge, pluginBundle } from 'vituum/utils/common.js'
+import {
+    getPackageInfo,
+    pluginError,
+    pluginReload,
+    merge,
+    pluginBundle,
+    normalizePath,
+    pluginMiddleware
+} from 'vituum/utils/common.js'
 import { renameBuildEnd, renameBuildStart } from 'vituum/utils/build.js'
 
 const { name } = getPackageInfo(import.meta.url)
@@ -46,9 +54,9 @@ const renderTemplate = ({ server, path, filename, cwd, packageRoot }, options, c
     const renderTransformedHtml = options.renderTransformedHtml(server ? filename.replace('.html', '') : filename)
 
     if (options.data) {
-        const normalizePaths = Array.isArray(options.data) ? options.data.map(path => path.replace(/\\/g, '/')) : options.data.replace(/\\/g, '/')
+        const normalizePaths = Array.isArray(options.data) ? options.data.map(path => normalizePath(path)) : normalizePath(options.data)
 
-        options.data = FastGlob.sync(normalizePaths).map(entry => resolve(process.cwd(), entry))
+        options.data = FastGlob.sync(normalizePaths).map(entry => resolve(cwd, entry))
     }
 
     Object.keys(options.filters).forEach(key => {
@@ -112,17 +120,19 @@ const plugin = (options = {}) => {
 
             if (!options.root) {
                 options.root = config.root
+            } else {
+                options.root = normalizePath(options.root)
             }
         },
         buildStart: async () => {
-            if (userEnv.command !== 'build') {
+            if (userEnv.command !== 'build' || !resolvedConfig.build.rollupOptions.input) {
                 return
             }
 
             await renameBuildStart(resolvedConfig.build.rollupOptions.input, options.formats)
         },
         buildEnd: async () => {
-            if (userEnv.command !== 'build') {
+            if (userEnv.command !== 'build' || !resolvedConfig.build.rollupOptions.input) {
                 return
             }
 
@@ -167,7 +177,7 @@ const plugin = (options = {}) => {
             }
         },
         handleHotUpdate: ({ file, server }) => pluginReload({ file, server }, options)
-    }, pluginBundle(options.formats)]
+    }, pluginBundle(options.formats), pluginMiddleware(name, options.formats)]
 }
 
 export default plugin
