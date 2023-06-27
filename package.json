@@ -1,31 +1,42 @@
 {
   "name": "@vituum/vite-plugin-latte",
-  "version": "0.1.21",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
+  "types": "types/index.d.ts",
   "scripts": {
+    "tsc": "tsc",
+    "eslint": "eslint '**/*.js' --fix",
     "dev": "vite dev",
-    "build": "vite build && mv public/views/* public && rm -rf public/views",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "vituum": "^1.0.0",
     "fast-glob": "^3.2.12",
     "lodash": "^4.17.21",
-    "chalk": "^5.2.0",
-    "minimatch": "^9.0.0"
+    "minimatch": "^9.0.2"
   },
   "devDependencies": {
-    "vite": "^4.2.2",
-    "eslint": "^8.38.0",
-    "eslint-config-standard": "^17.0.0"
+    "@types/node": "^20.3.2",
+    "vite": "^4.3.9",
+    "eslint": "^8.43.0",
+    "eslint-config-standard": "^17.1.0",
+    "typescript": "^5.1.3"
   },
   "files": [
     "index.js",
     "handler.js",
+    "handler-single.js",
     "index.php",
     "latte",
-    "vendor"
+    "vendor",
+    "types"
   ],
+  "exports": {
+    ".": "./index.js",
+    "./types": "./types/*"
+  },
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"

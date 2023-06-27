@@ -1,28 +1,40 @@
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
-import fs from 'fs'
+import { resolve, dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import fs from 'node:fs'
 import process from 'node:process'
-import * as childProcess from 'child_process'
+import * as childProcess from 'node:child_process'
 import FastGlob from 'fast-glob'
-import lodash from 'lodash'
 import { minimatch } from 'minimatch'
-import chalk from 'chalk'
+import {
+    getPackageInfo,
+    pluginError,
+    pluginReload,
+    merge,
+    pluginBundle,
+    normalizePath,
+    pluginMiddleware
+} from 'vituum/utils/common.js'
+import { renameBuildEnd, renameBuildStart } from 'vituum/utils/build.js'
 
-const defaultParams = {
+const { name } = getPackageInfo(import.meta.url)
+
+/**
+ * @type {import('@vituum/vite-plugin-latte/types').PluginUserConfig} options
+ */
+const defaultOptions = {
     reload: true,
     root: null,
-    bin: 'php',
     filters: {},
     functions: {},
     tags: {},
-    globals: {},
-    data: '',
-    isStringFilter: undefined,
-    ignoredPaths: [],
-    filetypes: {
-        html: /.(json.html|latte.json.html|latte.html)$/,
-        json: /.(json.latte.html)$/
-    }
+    globals: {
+        format: 'latte'
+    },
+    data: ['src/data/**/*.json'],
+    formats: ['latte', 'json.latte', 'json'],
+    bin: 'php',
+    renderTransformedHtml: () => false,
+    ignoredPaths: []
 }
 
 const execSync = (cmd) => {
@@ -38,119 +50,134 @@ const execSync = (cmd) => {
     }
 }
 
-const renderTemplate = (path, params, content) => {
-    if (params.data) {
-        const normalizePaths = Array.isArray(params.data) ? params.data.map(path => path.replace(/\\/g, '/')) : params.data.replace(/\\/g, '/')
+const renderTemplate = ({ server, path, filename, cwd, packageRoot }, options, content) => {
+    const renderTransformedHtml = options.renderTransformedHtml(server ? filename.replace('.html', '') : filename)
 
-        params.data = FastGlob.sync(normalizePaths).map(entry => resolve(process.cwd(), entry))
+    if (options.data) {
+        const normalizePaths = Array.isArray(options.data) ? options.data.map(path => normalizePath(path)) : normalizePath(options.data)
+
+        options.data = FastGlob.sync(normalizePaths).map(entry => resolve(cwd, entry))
     }
 
-    Object.keys(params.filters).forEach(key => {
-        if (typeof params.filters[key] === 'function') {
-            params.filters[key] = params.filters[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
+    Object.keys(options.filters).forEach(key => {
+        if (typeof options.filters[key] === 'function') {
+            options.filters[key] = options.filters[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
         }
     })
 
-    Object.keys(params.functions).forEach(key => {
-        if (typeof params.functions[key] === 'function') {
-            params.functions[key] = params.functions[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
+    Object.keys(options.functions).forEach(key => {
+        if (typeof options.functions[key] === 'function') {
+            options.functions[key] = options.functions[key].toString().match(/\(\s*([^)]+?)\s*\)/)[1].replace(/\s/g, '').split(',')
         }
     })
 
-    if (params.isString) {
+    if (renderTransformedHtml) {
         const timestamp = Math.floor(Date.now() * Math.random())
 
-        params.contentTimestamp = timestamp
+        options.contentTimestamp = timestamp
 
-        if (!fs.existsSync(resolve(params.packageRoot, 'temp'))) {
-            fs.mkdirSync(resolve(params.packageRoot, 'temp'))
+        if (!fs.existsSync(resolve(packageRoot, 'temp'))) {
+            fs.mkdirSync(resolve(packageRoot, 'temp'))
         }
 
-        fs.writeFileSync(resolve(params.packageRoot, `temp/${timestamp}.html`), content)
+        fs.writeFileSync(resolve(packageRoot, `temp/${timestamp}.html`), content)
     }
 
-    return execSync(`${params.bin} ${params.packageRoot}/index.php ${params.root + path} ${JSON.stringify(JSON.stringify(params))}`)
+    const data = Object.assign({ packageRoot, cwd, isRenderTransformedHtml: renderTransformedHtml }, options)
+
+    return execSync(`${options.bin} ${packageRoot}/index.php ${join(options.root, server ? path.replace('.html', '') : path)} ${JSON.stringify(JSON.stringify(data))}`)
 }
 
-const latte = (params = {}) => {
-    params.cwd = process.cwd()
+/**
+ * @param {import('@vituum/vite-plugin-latte/types').PluginUserConfig} options
+ * @returns [import('vite').Plugin]
+ */
+const plugin = (options = {}) => {
+    let resolvedConfig
+    let userEnv
 
-    params = lodash.merge(defaultParams, params)
+    options = merge(defaultOptions, options)
 
-    params.packageRoot = dirname((fileURLToPath(import.meta.url)))
+    const cwd = process.cwd()
+    const packageRoot = dirname((fileURLToPath(import.meta.url)))
 
-    if (fs.existsSync(resolve(params.packageRoot, 'temp'))) {
-        fs.rmSync(resolve(params.packageRoot, 'temp'), { recursive: true, force: true })
+    if (fs.existsSync(resolve(packageRoot, 'temp'))) {
+        fs.rmSync(resolve(packageRoot, 'temp'), { recursive: true, force: true })
     }
 
-    if (params.bin === 'docker') {
-        params.bin = `docker run --rm --name index -v "${process.cwd()}":/usr/src/app -w /usr/src/app php:8-cli php`
+    if (options.bin === 'docker') {
+        options.bin = `docker run --rm --name index -v "${process.cwd()}":/usr/src/app -w /usr/src/app php:8-cli php`
     }
 
-    return {
-        _params: params,
-        name: '@vituum/vite-plugin-latte',
-        config: ({ root }) => {
-            if (!params.root) {
-                params.root = root
+    return [{
+        _options: options,
+        name,
+        config (userConfig, env) {
+            userEnv = env
+        },
+        configResolved (config) {
+            resolvedConfig = config
+
+            if (!options.root) {
+                options.root = config.root
+            } else {
+                options.root = normalizePath(options.root)
             }
+        },
+        buildStart: async () => {
+            if (userEnv.command !== 'build' || !resolvedConfig.build.rollupOptions.input) {
+                return
+            }
+
+            await renameBuildStart(resolvedConfig.build.rollupOptions.input, options.formats)
+        },
+        buildEnd: async () => {
+            if (userEnv.command !== 'build' || !resolvedConfig.build.rollupOptions.input) {
+                return
+            }
+
+            await renameBuildEnd(resolvedConfig.build.rollupOptions.input, options.formats)
         },
         transformIndexHtml: {
             enforce: 'pre',
-            async transform(content, { path, filename, server }) {
-                path = path.replace('?raw', '')
-                filename = filename.replace('?raw', '')
-
-                if (params.ignoredPaths.filter(ignoredPaths => minimatch(path.replace('.html', '').replace('.vituum', ''), ignoredPaths)).length !== 0) {
+            async transform (content, { path, filename, server }) {
+                if (options.ignoredPaths.find(ignoredPath => minimatch(path.replace('.html', ''), ignoredPath) === true)) {
                     return content
                 }
 
                 if (
-                    !params.filetypes.html.test(path) &&
-                    !params.filetypes.json.test(path) &&
-                    !content.startsWith('<script type="application/json" data-format="latte"')
+                    !options.formats.find(format => filename.replace('.html', '').endsWith(format)) ||
+                    (filename.replace('.html', '').endsWith('.json') && !content.startsWith('{'))
                 ) {
                     return content
                 }
 
-                if (typeof params.isStringFilter === 'function' && params.isStringFilter(filename)) {
-                    params.isString = true
-                } else {
-                    params.isString = false
+                if (
+                    (filename.replace('.html', '').endsWith('.json') && content.startsWith('{')) &&
+                    (JSON.parse(content)?.format && !options.formats.includes(JSON.parse(content)?.format))
+                ) {
+                    return content
                 }
 
-                const renderLatte = renderTemplate(path, params, content)
-                const warningLog = renderLatte.output.includes('Warning: Undefined')
+                const render = renderTemplate({ server, path, filename, cwd, packageRoot }, options, content)
+                const warningLog = render.output.includes('Warning: Undefined')
 
-                if (renderLatte.error || warningLog) {
-                    if (!server) {
-                        console.error(chalk.red(renderLatte.output))
+                if (render.error || warningLog) {
+                    const message = warningLog ? 'Warning: Undefined' + render.output.split('Warning: Undefined').pop() : render.output
+                    const renderError = pluginError(message, server, name)
+
+                    if (renderError && server) {
                         return
+                    } else if (renderError) {
+                        return renderError
                     }
-
-                    const message = warningLog ? 'Warning: Undefined' + renderLatte.output.split('Warning: Undefined').pop() : renderLatte.output
-
-                    setTimeout(() => server.ws.send({
-                        type: 'error',
-                        err: {
-                            message,
-                            plugin: '@vituum/vite-plugin-latte'
-                        }
-                    }), 50)
                 }
 
-                return renderLatte.output
+                return render.output
             }
         },
-        handleHotUpdate({ file, server }) {
-            if (
-                (typeof params.reload === 'function' && params.reload(file)) ||
-                (typeof params.reload === 'boolean' && params.reload && (params.filetypes.html.test(file) || params.filetypes.json.test(file)))
-            ) {
-                server.ws.send({ type: 'full-reload' })
-            }
-        }
-    }
+        handleHotUpdate: ({ file, server }) => pluginReload({ file, server }, options)
+    }, pluginBundle(options.formats), pluginMiddleware(name, options.formats)]
 }
 
-export default latte
+export default plugin
