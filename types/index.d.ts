@@ -11,3 +11,5 @@ export interface PluginUserConfig {
     renderTransformedHtml?: (filename: string) => boolean
     ignoredPaths?: string[]
 }
+
+export default function plugin(options?: PluginUserConfig) : import('vite').Plugin
