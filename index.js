@@ -139,8 +139,8 @@ const plugin = (options = {}) => {
             await renameBuildEnd(resolvedConfig.build.rollupOptions.input, options.formats)
         },
         transformIndexHtml: {
-            enforce: 'pre',
-            async transform (content, { path, filename, server }) {
+            order: 'pre',
+            async handler (content, { path, filename, server }) {
                 if (options.ignoredPaths.find(ignoredPath => minimatch(path.replace('.html', ''), ignoredPath) === true)) {
                     return content
                 }
