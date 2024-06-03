@@ -5,7 +5,7 @@ namespace App\Latte;
 class PlaceholderFunction {
 
     public static function execute($width, $height): string {
-        $colors = ["333", "444", "666", "222", "777", "888", "111"];
-        return 'https://via.placeholder.com/' . $width . 'x' . $height . '/' . $colors[array_rand($colors)];
+        $colors = ["333333", "444444", "666666", "222222", "777777", "888888", "111111"];
+        return 'https://placehold.co/' . $width . 'x' . $height . '/' . $colors[array_rand($colors)] . '/' . 'webp';
     }
 }
