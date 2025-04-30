@@ -29,6 +29,8 @@ if ($isDocker) {
     define("TEMPLATES_DIR", $config->cwd . '/src/templates/');
 }
 
+define("VITE_SERVER", $config->viteServer);
+
 define("PACKAGE_DIR", str_replace($config->cwd, ROOT_DIR, $config->packageRoot));
 
 /**

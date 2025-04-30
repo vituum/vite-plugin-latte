@@ -50,7 +50,7 @@ const execSync = (cmd) => {
     }
 }
 
-const renderTemplate = ({ server, path, filename, cwd, packageRoot }, options, content) => {
+const renderTemplate = ({ server, path, filename, cwd, packageRoot, viteServer }, options, content) => {
     const renderTransformedHtml = options.renderTransformedHtml(server ? filename.replace('.html', '') : filename)
 
     if (options.data) {
@@ -83,7 +83,7 @@ const renderTemplate = ({ server, path, filename, cwd, packageRoot }, options, c
         fs.writeFileSync(resolve(packageRoot, `temp/${timestamp}.html`), content)
     }
 
-    const data = Object.assign({ packageRoot, cwd, isRenderTransformedHtml: renderTransformedHtml }, options)
+    const data = Object.assign({ packageRoot, cwd, isRenderTransformedHtml: renderTransformedHtml, viteServer }, options)
 
     return execSync(`${options.bin} ${packageRoot}/index.php ${join(options.root, server ? path.replace('.html', '') : path)} ${JSON.stringify(JSON.stringify(data))}`)
 }
@@ -159,7 +159,9 @@ const plugin = (options = {}) => {
                     return content
                 }
 
-                const render = renderTemplate({ server, path, filename, cwd, packageRoot }, options, content)
+                const viteServer = !!server
+
+                const render = renderTemplate({ server, path, filename, cwd, packageRoot, viteServer }, options, content)
                 const warningLog = render.output.includes('Warning: Undefined')
 
                 if (render.error || warningLog) {
