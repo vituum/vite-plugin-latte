@@ -1,6 +1,6 @@
 {
   "name": "@vituum/vite-plugin-latte",
-  "version": "2.0.0-next.3",
+  "version": "2.0.0-next.4",
   "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "picomatch": "^4.0.3",
-    "vituum": "^2.0.0-next.6"
+    "vituum": "^2.0.0-next.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.39",
@@ -37,9 +37,9 @@
     "types"
   ],
   "exports": {
-    ".": "./index.js",
-    "./types/*": {
-      "types": "./types/*"
+    ".": {
+      "default": "./index.js",
+      "types": "./types/index.d.ts"
     }
   },
   "engines": {
