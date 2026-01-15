@@ -3,13 +3,12 @@ import { fileURLToPath } from 'node:url'
 import fs from 'node:fs'
 import process from 'node:process'
 import * as childProcess from 'node:child_process'
-import FastGlob from 'fast-glob'
-import { minimatch } from 'minimatch'
+import picomatch from 'picomatch'
 import {
   getPackageInfo,
   pluginError,
   pluginReload,
-  merge,
+  deepMergeWith,
   pluginBundle,
   normalizePath,
   pluginMiddleware,
@@ -57,7 +56,7 @@ const renderTemplate = ({ server, path, filename, cwd, packageRoot, viteServer }
   if (options.data) {
     const normalizePaths = Array.isArray(options.data) ? options.data.map(path => normalizePath(path)) : normalizePath(options.data)
 
-    options.data = FastGlob.sync(normalizePaths).map(entry => resolve(cwd, entry))
+    options.data = fs.globSync(normalizePaths).map(entry => resolve(cwd, entry))
   }
 
   Object.keys(options.filters).forEach((key) => {
@@ -97,7 +96,7 @@ const plugin = (options = {}) => {
   let resolvedConfig
   let userEnv
 
-  options = merge(defaultOptions, options)
+  options = deepMergeWith(defaultOptions, options)
 
   const cwd = process.cwd()
   const packageRoot = dirname((fileURLToPath(import.meta.url)))
@@ -143,7 +142,7 @@ const plugin = (options = {}) => {
     transformIndexHtml: {
       order: 'pre',
       async handler(content, { path, filename, server }) {
-        if (options.ignoredPaths.find(ignoredPath => minimatch(path.replace('.html', ''), ignoredPath) === true)) {
+        if (options.ignoredPaths.find(ignoredPath => picomatch(ignoredPath)(path.replace('.html', '')) === true)) {
           return content
         }
 
