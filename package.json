@@ -1,10 +1,11 @@
 {
   "name": "@vituum/vite-plugin-latte",
-  "version": "2.0.0-next.4",
+  "version": "2.0.0-next.5",
   "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
   "scripts": {
+    "lint": "npm run eslint && npm run tsc",
     "tsc": "tsc",
     "eslint": "eslint '**/*.js'",
     "eslint-fix": "eslint '**/*.js' --fix",
@@ -15,7 +16,7 @@
   },
   "dependencies": {
     "picomatch": "^4.0.3",
-    "vituum": "^2.0.0-next.7"
+    "vituum": "^2.0.0-next.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.39",
