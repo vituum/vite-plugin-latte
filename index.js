@@ -90,7 +90,7 @@ const renderTemplate = ({ server, path, filename, cwd, packageRoot, viteServer }
 
 /**
  * @param {import('@vituum/vite-plugin-latte/types').PluginUserConfig} options
- * @returns [import('vite').Plugin]
+ * @returns {import('vite').Plugin[]}
  */
 const plugin = (options = {}) => {
   let resolvedConfig
@@ -110,6 +110,7 @@ const plugin = (options = {}) => {
   }
 
   return [{
+    // @ts-ignore
     _options: options,
     name,
     config(userConfig, env) {
