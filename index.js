@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import fs from 'node:fs'
 import process from 'node:process'
 import * as childProcess from 'node:child_process'
+import { globSync } from 'tinyglobby'
 import picomatch from 'picomatch'
 import {
   getPackageInfo,
@@ -56,7 +57,7 @@ const renderTemplate = ({ server, path, filename, cwd, packageRoot, viteServer }
   if (options.data) {
     const normalizePaths = Array.isArray(options.data) ? options.data.map(path => normalizePath(path)) : normalizePath(options.data)
 
-    options.data = fs.globSync(normalizePaths).map(entry => resolve(cwd, entry))
+    options.data = globSync(normalizePaths).map(entry => resolve(cwd, entry))
   }
 
   Object.keys(options.filters).forEach((key) => {
