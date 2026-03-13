@@ -39,6 +39,6 @@ or
 
 ### Requirements
 
-- [Node.js LTS (16.x)](https://nodejs.org/en/download/)
+- [Node.js LTS (20.x)](https://nodejs.org/en/download/)
 - [PHP (8.x)](https://www.php.net/) or [Docker PHP (8.x)](https://hub.docker.com/_/php)
 - [Vite](https://vitejs.dev/)

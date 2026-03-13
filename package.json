@@ -1,28 +1,33 @@
 {
   "name": "@vituum/vite-plugin-latte",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
   "scripts": {
+    "lint": "npm run eslint && npm run tsc",
     "tsc": "tsc",
-    "eslint": "eslint '**/*.js' --fix",
+    "eslint": "eslint '**/*.js'",
+    "eslint-fix": "eslint '**/*.js' --fix",
     "dev": "vite dev",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "publish-next": "npm publish --tag next"
   },
   "dependencies": {
-    "vituum": "^1.1",
-    "fast-glob": "^3.3",
-    "lodash": "^4.17",
-    "minimatch": "^10.0"
+    "picomatch": "^4.0",
+    "tinyglobby": "^0.2",
+    "vituum": "^2.0"
   },
   "devDependencies": {
-    "@types/node": "^22.9.3",
-    "vite": "^5.4.11",
-    "eslint": "^8.57.1",
-    "eslint-config-standard": "^17.1.0",
-    "typescript": "^5.7.2"
+    "@eslint/js": "^10.0",
+    "@stylistic/eslint-plugin": "^5.10",
+    "@types/node": "^25",
+    "@types/picomatch": "^4.0",
+    "eslint": "^10.0",
+    "globals": "^17.4",
+    "typescript": "^5.9",
+    "vite": "^8.0"
   },
   "files": [
     "index.js",
@@ -34,11 +39,13 @@
     "types"
   ],
   "exports": {
-    ".": "./index.js",
-    "./types": "./types/*"
+    ".": {
+      "default": "./index.js",
+      "types": "./types/index.d.ts"
+    }
   },
   "engines": {
-    "node": "^18.0.0 || >=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "repository": {
     "type": "git",
