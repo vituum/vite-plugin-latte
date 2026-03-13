@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "picomatch": "^4.0",
-    "tinyglobby": "^0.2.15",
+    "tinyglobby": "^0.2",
     "vituum": "^2.0"
   },
   "devDependencies": {
