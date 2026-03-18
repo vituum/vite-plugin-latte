@@ -4,7 +4,7 @@
   "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
-  "description": "Vite plugin for Latte, transforms latte templates via php into HTML ",
+  "description": "Vite plugin for Latte, transforms latte templates via php into HTML",
   "keywords": [
     "latte",
     "vituum",
