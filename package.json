@@ -1,10 +1,10 @@
 {
   "name": "@vituum/vite-plugin-latte",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
-  "description": "Vite plugin for PostCSS, adds basic plugins out of the box",
+  "description": "Vite plugin for Latte, transforms latte templates via php into HTML ",
   "keywords": [
     "latte",
     "vituum",
